@@ -144,7 +144,69 @@ def save_data_as_npz(folder_data, file_data, folder_save, file_save):
     data, scale, fs = read_data(folder_data, file_data)   
     save_data(folder_save, file_save, data, scale, fs)
     del data, scale, fs
+
+def trigger_on_spike(folder, file, new_folder_save, new_file_save, thresh = -30, el=0,
+                     time_range=[-10,30], use_time = [], up = True, center_on_peak = False):
+    """ reads gap free data from .npz file and triggers on event on given electrode 
+    then it saves the new data in the form of the traces in .npz format"""
+    [data, y_scale, fs] = read_npzdata(folder, file, "data", "scale", "fs")
+    if use_time != []:
+        data = data[:,:,use_time[0]:use_time[1]]
+        
+    # read the data from the given electrode
+    data2trigger = data[el,0,:]
+    time_range_pts = [ms2pts(time_range[0], fs),ms2pts(time_range[1], fs)]
     
+    # check which parts of the data are above the threshold
+    if up:
+        above_thres = [data2trigger >= thresh]
+    else:
+        above_thres = [data2trigger <= thresh]
+        
+    data_bool = data2trigger.copy()
+    data_bool[above_thres[0]] = 1
+    data_bool[~above_thres[0]] = 0
+    
+    # use the data with the margins cut to time_range given
+    cut_margins = data_bool[-time_range_pts[0]:-time_range_pts[1]]
+    
+    last_id = -time_range_pts[0]
+    next_id = np.where(cut_margins==1)[0]
+    
+
+    new_data=[]
+    while len(next_id) > 0:
+        # id where the next rise of the spike was found
+        next_id = next_id[0]
+        trig_id = next_id+last_id+1 # 
+        new_trace = data[:,0,trig_id + time_range_pts[0]:trig_id + time_range_pts[1]]
+            
+        if center_on_peak:
+            if up:
+                move_pts = np.argmax(new_trace[el,:])
+            else:
+                move_pts = np.argmin(new_trace[el,:])
+                import pdb; pdb.set_trace()
+            trig_id = trig_id + (move_pts + time_range_pts[0])
+            new_trace = data[:,0,trig_id + time_range_pts[0]:trig_id + time_range_pts[1]]
+        
+        new_data.append(new_trace)
+        #import pdb; pdb.set_trace()
+        #print old_trig_id - trig_id - time_range_pts[1]
+        #print pts2ms(trig_id, fs)
+        cut_margins = data_bool[trig_id +time_range_pts[1]:-time_range_pts[1]]
+        last_id = trig_id + time_range_pts[1]
+        next_id = np.where(cut_margins==1)[0]
+        
+    
+    
+    new_data = np.array(new_data)
+    new_data = np.swapaxes(new_data,1,0)
+    fold.create_folder(new_folder_save)  
+    save_data(new_folder_save, new_file_save, new_data, y_scale, fs)
+    del new_data, data, y_scale, fs 
+    
+
 # - unfinished - untested
     
 

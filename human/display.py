@@ -6,14 +6,14 @@ import matplotlib.ticker as tic
 
 
 def plot_data_one_mean(data_details, folder_save, file_save, x_scale = 'sec', title = 'Data', sweeps = [], electrodes=[],time_range=[],
-                       y_range = [-30, 70], y_title = 'Voltage (mV)'):
+                       y_range = [-30, 70], y_title = 'Voltage (mV)',
+                       remove_avg = False):
     """ reads and then plots given data in one plot, and calculates average,
     sweeps can be selected; if sweeps = [], all will be plotted
     x_scale - time scale in which to display the data, possible options:
     'ms', 'sec', 'min' """   
     [data, y_scale, fs] = data_details #dh.read_npzdata(folder, file, "data", "scale", "fs")
    
-    remove_avg = False
     #import pdb; pdb.set_trace() 
     if sweeps == []:
         data = data[:,:,:]
@@ -32,15 +32,16 @@ def plot_data_one_mean(data_details, folder_save, file_save, x_scale = 'sec', ti
         
     plot_color = '0.5'
     fig = plt.figure()
-
+   
     for trace in range(np.size(data, 1)):
+
         if not remove_avg:
             plot_one_data(data[:,trace,:], title, fs, x_scale, y_scale, plot_color,
                           y_range=y_range, y_title=y_title)
         elif remove_avg:
-            #import pdb; pdb.set_trace() 
-            calc_avg = np.average(data[:,trace,:])
-            data[:,trace,:]=data[:,trace,:]-calc_avg
+             
+            calc_avg = np.average(data[:,trace,0:100],1)
+            data[:,trace,:]=data[:,trace,:]-np.transpose(np.resize(calc_avg,(len(data[0,0,:]),len(calc_avg))))
             plot_one_data(data[:,trace,:], title, fs, x_scale, y_scale, plot_color,
                           y_range=y_range, y_title=y_title)
     avg = np.mean(data,1)
@@ -118,5 +119,11 @@ def plot_data(folder_save,file_save,folder, file, x_scale = 'sec',
         plt.savefig(folder_save+str(trace) +file_save)
         plt.show()
     
+
+    
+    
+    
+    
+        
         
         
