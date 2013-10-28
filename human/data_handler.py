@@ -50,10 +50,12 @@ def read_abfdata(full_path):
     reader = neo.io.AxonIO(filename=full_path)
     block = reader.read_block()
     data = []
-
+    
+    
     for i in range(len(block.segments)):
         seg = block.segments[i]
         data.append(seg.analogsignals)
+    #import pdb; pdb.set_trace()
     return data, len(block.segments)
 
 def get_electrdata(data, no_segments, segments = []):
@@ -123,8 +125,27 @@ def get_timeline(data, fs, scale='ms'):
     t = len(data) / fs * divider[scale]
     return np.linspace(0, t, len(data))
 
-# - unfinished - untested
+def ms2pts(ms, fs):
+    """ converts number of ms to number of data pts"""
+    pts = (fs / 1000.0) * ms
+    return pts
 
+def pts2ms(pts, fs):
+    """ converts number of pts to number of ms"""
+    ms = (pts/fs)*1000.0
+    return ms
+
+
+def save_data_as_npz(folder_data, file_data, folder_save, file_save):
+    """ takes given data file from the data folder (.abf) and saves 
+    it as .npz file under file_save in the folder_save"""
+    
+    fold.create_folder(folder_save)
+    data, scale, fs = read_data(folder_data, file_data)   
+    save_data(folder_save, file_save, data, scale, fs)
+    del data, scale, fs
+    
+# - unfinished - untested
     
 
 
