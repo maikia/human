@@ -180,20 +180,18 @@ def trigger_on_spike(folder, file, new_folder_save, new_file_save, thresh = -30,
         next_id = next_id[0]
         trig_id = next_id+last_id+1 # 
         new_trace = data[:,0,trig_id + time_range_pts[0]:trig_id + time_range_pts[1]]
-            
+        
         if center_on_peak:
             if up:
-                move_pts = np.argmax(new_trace[el,:])
+                move_pts = np.argmax(new_trace[el,time_range_pts[0]-1:])
             else:
-                move_pts = np.argmin(new_trace[el,:])
-                import pdb; pdb.set_trace()
-            trig_id = trig_id + (move_pts + time_range_pts[0])
+                move_pts = np.argmin(new_trace[el,time_range_pts[0]-1:]) 
+                
+            trig_id = trig_id + move_pts
             new_trace = data[:,0,trig_id + time_range_pts[0]:trig_id + time_range_pts[1]]
         
         new_data.append(new_trace)
-        #import pdb; pdb.set_trace()
-        #print old_trig_id - trig_id - time_range_pts[1]
-        #print pts2ms(trig_id, fs)
+
         cut_margins = data_bool[trig_id +time_range_pts[1]:-time_range_pts[1]]
         last_id = trig_id + time_range_pts[1]
         next_id = np.where(cut_margins==1)[0]

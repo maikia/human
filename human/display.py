@@ -27,7 +27,6 @@ def plot_data_one_mean(data_details, folder_save, file_save, x_scale = 'sec', ti
     if time_range != []:
         time_pts1 = dh.ms2pts(time_range[0], fs)
         time_pts2 = dh.ms2pts(time_range[1], fs)
-        #import pdb; pdb.set_trace()
         data=data[:,:,time_pts1:time_pts2] 
         
     plot_color = '0.5'
@@ -88,11 +87,12 @@ def plot_one_data(data_trace, tit, fs, x_scale, y_scale, plot_color, lw=2,
         plt.xlim([0, max(t)])
         plt.ylabel(y_title)
         
-    plt.xlabel('Time (ms)')
+    plt.xlabel('Time ('+x_scale + ')')
     
 
 def plot_data(folder_save,file_save,folder, file, x_scale = 'sec',
-              title = 'Data', time_range = [], y_range =[-30, 70]):
+              title = 'Data', time_range = [], y_range =[-30, 70],
+              electrodes = []):
     """ reads and then plots given data
     x_scale - time scale in which to display the data, possible options:
     'ms', 'sec', 'min'; time_range is given in 'ms' """
@@ -101,7 +101,9 @@ def plot_data(folder_save,file_save,folder, file, x_scale = 'sec',
     # read the data
     [data, y_scale, fs] = dh.read_npzdata(folder, file, "data", "scale", "fs")
     
-
+    if electrodes!=[]:
+        data=data[electrodes,:,:]   
+        
     if time_range != []:
         time_pts1 = dh.ms2pts(time_range[0], fs)
         time_pts2 = dh.ms2pts(time_range[1], fs)
