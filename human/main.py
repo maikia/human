@@ -65,7 +65,7 @@ def plot_all_figures():
     figure_exp_18(folder_save, file1, file2, fig_type = fig_type)
 
 
-exp.figure_exp_4_2(fig_type = '.png', save_traces = False)
+exp.figure_exp_13(fig_type = '.png', save_traces = True)
 #exp.save_all_as_npz()
 
  

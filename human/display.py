@@ -75,7 +75,8 @@ def plot_one_data(data_trace, tit, fs, x_scale, y_scale, plot_color, lw=2,
             plt.title(tit)
         else:    
             ax.title.set_visible(False)
-            plt.ylim(y_range)
+            if y_range != []:
+                plt.ylim(y_range)
             #plt.ylim([-400,1200])
             
         

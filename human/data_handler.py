@@ -3,6 +3,7 @@ import neo.io
 import math
 import os
 import folder_handler as fold
+import filtit as filt
 
 
 ####################- reading data - #
@@ -155,7 +156,7 @@ def trigger_on_spike(folder, file, new_folder_save, new_file_save, thresh = -30,
         
     # read the data from the given electrode
     data2trigger = data[el,0,:]
-    time_range_pts = [ms2pts(time_range[0], fs),ms2pts(time_range[1], fs)]
+    time_range_pts = [int(ms2pts(time_range[0], fs)),int(ms2pts(time_range[1], fs))]
     
     # check which parts of the data are above the threshold
     if up:
@@ -189,7 +190,8 @@ def trigger_on_spike(folder, file, new_folder_save, new_file_save, thresh = -30,
                 
             trig_id = trig_id + move_pts
             new_trace = data[:,0,trig_id + time_range_pts[0]:trig_id + time_range_pts[1]]
-        
+        #if len(new_data) == 447:
+            #import pdb; pdb.set_trace()
         new_data.append(new_trace)
 
         cut_margins = data_bool[trig_id +time_range_pts[1]:-time_range_pts[1]]
@@ -204,7 +206,41 @@ def trigger_on_spike(folder, file, new_folder_save, new_file_save, thresh = -30,
     save_data(new_folder_save, new_file_save, new_data, y_scale, fs)
     del new_data, data, y_scale, fs 
     
-
+def filter_data(folder_data, file_data, new_folder, new_file, freq, 
+                electrodes = [],N = 100, filter_type = 'low_pass'):
+    """ given the .npz file with the data, it filters the electrodes given
+    and saves the new data in the new .npz file
+    if electrodes == [], all electrodes will be used;
+    N - filter order
+    filter type = 'low_pass' or 'high_pass' or 'band_pass' """
+    # extract the data
+    [data, y_scale, fs] = read_npzdata(folder_data, file_data, "data", "scale", "fs")     
+    if electrodes == []:
+        electrodes = range(len(data))
+    #import pdb; pdb.set_trace()
+    #new_data = data.copy()
+    
+    freq= freq*(1.)
+    for electr in electrodes:
+        for trace in range(np.size(data,1)):
+            # filter the data
+            if filter_type == 'low_pass':
+                b_lp = filt.FilterDesign((0, freq / fs), N) # < freq Hz
+                data[electr,trace,:] = filt.filtfilt(b_lp, [1], data[electr,trace,:])        
+            elif filter_type == 'high_pass':
+                b_hp = filt.FilterDesign(( freq/ fs, 1), N) # > freq Hz
+                data[electr,trace,:] = filt.filtfilt(b_hp, [1], data[electr,trace,:])        
+            elif filter_type == 'band_pass':
+                b_bp = filt.FilterDesign((freq[0] / fs, freq[1] / fs), N) # freq[0]Hz > x > freq[1]Hz
+                data[electr,trace,:] = filt.filtfilt(b_bp, [1], data[electr,trace,:]) 
+    
+    
+    fold.create_folder(new_folder)  
+    save_data(new_folder, new_file, data, y_scale, fs)       
+    
+    
+   
+    
 # - unfinished - untested
     
 
