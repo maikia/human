@@ -146,6 +146,109 @@ def save_data_as_npz(folder_data, file_data, folder_save, file_save):
     save_data(folder_save, file_save, data, scale, fs)
     del data, scale, fs
 
+def calculate_spike_width(data, up = False):
+    """ """
+    # if spike is going up, change the whole data to the opposite direction
+    if up:
+        data = data * (-1.)
+        
+    # detect lowest point in the given range
+    min_point_idx = np.argmin(data)
+    before_min = np.diff(data[0:min_point_idx])
+    before_min[before_min < 0] = 0
+    before_min[before_min >0] = 1
+    max_left_idx = np.where(before_min == 1)[0]
+    
+    if len(max_left_idx) == 0:
+        max_left_idx = 0
+    else: 
+        max_left_idx = max_left_idx[-1]   
+    
+    after_min = np.diff(data[min_point_idx:])
+    after_min[after_min < 0] = 0
+    after_min[after_min > 0] = 1
+    max_right_idx = np.where(after_min == 0)[0]
+    
+    if len(max_right_idx) == 0:
+        max_right_idx = len(data)-1
+    else: 
+        max_right_idx = max_right_idx[0] + min_point_idx
+
+    max_left = data[max_left_idx]
+    max_right = data[max_right_idx]
+    peak = data[min_point_idx]
+    mid_high_point = np.mean([max_left, max_right])
+    
+    depth = np.abs(mid_high_point - peak)
+    appear_time_pts = min_point_idx
+    
+    mid_hight = np.mean([mid_high_point, peak])
+    # find on the left side at which index is mid hight
+
+    left_mid_below = np.where((data[max_left_idx:min_point_idx] < mid_hight) == True)[0]
+    if len(left_mid_below) == 0:
+        left_mid_below = max_left_idx
+    else:
+        left_mid_below = left_mid_below[0] + max_left_idx
+
+#        import pdb; pdb.set_trace()
+    left_mid_above = left_mid_below-1
+    
+    # find on the right side at which index is mid hight
+
+    right_mid_above = np.where((data[min_point_idx:max_right_idx] < mid_hight) == False)[0]
+    if len(right_mid_above) == 0:
+        right_mid_above = max_right_idx
+    else:
+        right_mid_above = right_mid_above[0] + min_point_idx
+        
+    right_mid_below = right_mid_above-1    
+    
+    #Calculate index of the midpoint (it most likely will be float)
+    high_left = data[left_mid_above]
+    low_left =  data[left_mid_below]
+    exact_mid_left = left_mid_below - int((mid_hight - low_left)/(high_left - low_left) * 100)/100.0
+    
+    
+    high_right = data[right_mid_above]
+    low_right =  data[right_mid_below]
+    exact_mid_right = right_mid_below + int((mid_hight - low_right)/(high_right - low_right)*100)/100.0
+    
+    mid_width_pts =   exact_mid_right-  exact_mid_left
+    
+    return appear_time_pts, mid_width_pts, depth
+
+def calculate_spike_width_in_traces(folder_save,file2save_filtnpz, traces = [], time_range = [16.5,18.5], 
+                                    electrode = 1, up = False):
+    """ reads the data divided to traces, takes the range part from each 
+    of the trace (unless range == [], than it takes the whole piece), and finds the parameters 
+    of the spike or the wave (as in calculate_spike_width) and returns the params:
+    width of the spike, exact ms when it's peak appears, it's depth 
+    Parameter up says if spike is going up or down """
+    [data, y_scale, fs] = read_npzdata(folder_save, file2save_filtnpz, "data", "scale", "fs")
+    
+    if traces != []:
+        data = data[:,traces,:]
+    
+    if range != []:
+        time_range_pts = [int(ms2pts(time_range[0], fs)),int(ms2pts(time_range[1], fs))]
+        data = data[:,:,time_range_pts[0]:time_range_pts[1]]
+        
+    data = data[electrode, :,:]
+    
+    all_times = np.zeros(len(data))
+    all_width = np.zeros(len(data))
+    all_depth = np.zeros(len(data))
+    
+    for trace in range(len(data)):
+        time_pts, width_pts, all_depth[trace] = calculate_spike_width(data[trace,:], up = up)
+        all_times[trace] = pts2ms(time_pts, fs)
+        all_width[trace] =pts2ms(width_pts, fs)
+    
+    del data
+    return all_times + time_range[0], all_width, all_depth
+
+
 def trigger_on_spike(folder, file, new_folder_save, new_file_save, thresh = -30, el=0,
                      time_range=[-10,30], use_time = [], up = True, center_on_peak = False):
     """ reads gap free data from .npz file and triggers on event on given electrode 
