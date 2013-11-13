@@ -7,7 +7,7 @@ import matplotlib.ticker as tic
 
 def plot_data_one_mean(data_details, folder_save, file_save, x_scale = 'sec', title = 'Data', sweeps = [], electrodes=[],time_range=[],
                        y_range = [-30, 70], y_title = 'Voltage (mV)',
-                       remove_avg = False):
+                       y_range_intra = [], remove_avg = False):
     """ reads and then plots given data in one plot, and calculates average,
     sweeps can be selected; if sweeps = [], all will be plotted
     x_scale - time scale in which to display the data, possible options:
@@ -46,7 +46,7 @@ def plot_data_one_mean(data_details, folder_save, file_save, x_scale = 'sec', ti
     avg = np.mean(data,1)
     
     plot_one_data(avg, title, fs, x_scale, y_scale, 'k', lw=3,
-                          y_range=y_range, y_title=y_title)    
+                          y_range_intra = y_range_intra, y_range=y_range, y_title=y_title)    
     #plt.title(title)
     #print title
     #print folder_save+file_save
@@ -54,7 +54,7 @@ def plot_data_one_mean(data_details, folder_save, file_save, x_scale = 'sec', ti
 
 
 def plot_one_data(data_trace, tit, fs, x_scale, y_scale, plot_color, lw=2,
-                  y_range = [-30, 70], y_title = 'Voltage (mV)'):
+                  y_range_intra = [],y_range = [-30, 70], y_title = 'Voltage (mV)'):
     
     t = dh.get_timeline(data_trace[0, :], fs, scale = x_scale)
     
@@ -73,6 +73,8 @@ def plot_one_data(data_trace, tit, fs, x_scale, y_scale, plot_color, lw=2,
         
         if electr == 0:
             plt.title(tit)
+            if y_range_intra != []:
+                plt.ylim(y_range_intra)
         else:    
             ax.title.set_visible(False)
             if y_range != []:
@@ -93,7 +95,7 @@ def plot_one_data(data_trace, tit, fs, x_scale, y_scale, plot_color, lw=2,
 
 def plot_data(folder_save,file_save,folder, file, x_scale = 'sec',
               title = 'Data', time_range = [], y_range =[-30, 70],
-              electrodes = []):
+              electrodes = [],y_range_intra = []):
     """ reads and then plots given data
     x_scale - time scale in which to display the data, possible options:
     'ms', 'sec', 'min'; time_range is given in 'ms' """
@@ -118,7 +120,8 @@ def plot_data(folder_save,file_save,folder, file, x_scale = 'sec',
             tit = title + ', trace ' + str(trace)
         else:
             tit = title
-        plot_one_data(data[:,trace,:], tit, fs, x_scale, y_scale, plot_color, y_range=y_range)
+        plot_one_data(data[:,trace,:], tit, fs, x_scale, y_scale, plot_color, y_range=y_range, 
+                      y_range_intra = y_range_intra)
         plt.savefig(folder_save+str(trace) +file_save)
         plt.show()
     

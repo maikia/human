@@ -38,11 +38,6 @@ def playing_with_data():
     #display.plot_data_one_mean(folder_save, file_save, x_scale = 'ms',sweeps=[1,40,55,62]) 
     #display.plot_data_one_mean(folder_save, file_save, x_scale = 'ms')
 
-
-
-def figure_exp_18(folder_save, file1, file2, fig_type = '.png'):
-    pass
-
 def plot_all_figures():
     """ draws and saves all the figures """
     fig_type = '.png'
@@ -64,7 +59,9 @@ def plot_all_figures():
     file2 = '2013_10_08_0008_NBQX.npz'    
     figure_exp_18(folder_save, file1, file2, fig_type = fig_type)
 
-exp.figure_exp_2(fig_type = '.png', save_traces = True)
+#exp.save_all_as_npz(fig_no = [25])
+exp.figure_exp_11(fig_type = '.eps',show_traces = True) #,save_traces=False)
+
 #exp.save_all_as_npz()
 
  

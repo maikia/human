@@ -249,6 +249,50 @@ def calculate_spike_width_in_traces(folder_save,file2save_filtnpz, traces = [], 
     return all_times + time_range[0], all_width, all_depth
 
 
+def calculate_ratio_maxs_in_electrodes(folder_save,file_save, electrodes = [], 
+                                       el1_max = True, el2_max = True, traces = [],
+                                       remove_avg = False, plot_it = True, 
+                                       title = 'ratio', x_range = [], y_range = [], 
+                                       fig_type = '.png'):
+    """ data must be divided to traces """
+    [data, y_scale, fs] = read_npzdata(folder_save, file_save, "data", "scale", "fs")
+    if traces != []:
+        data = data[:, traces, :]
+    data = data[electrodes,:,:]
+    
+    if remove_avg:
+        for trace in range(np.size(data,1)):
+            calc_avg = np.average(data[:,trace,0:100],1)
+            data[:,trace,:]=data[:,trace,:]-np.transpose(np.resize(calc_avg,(len(data[0,0,:]),len(calc_avg))))
+    
+    el1 = data[electrodes[0],:,:]
+    el2 = data[electrodes[1],:,:]
+
+    if el1_max:
+        max_el1 = np.max(el1,1)
+    else:
+        max_el1 = np.abs(np.min(el1,1))
+    if el2_max:    
+        max_el2 = np.max(el2,1)
+    else:
+        max_el2 = np.abs(np.min(el2,1))
+    
+    if plot_it:
+        import pylab as plt
+        plt.plot(max_el1, max_el2, 'o')
+        
+        
+        if x_range != []:
+            plt.xlim([x_range[0], x_range[1]])
+    
+        if y_range != []:
+            plt.ylim([y_range[0], y_range[1]])
+        plt.xlabel('electrode ' + str(electrodes[0]))
+        plt.ylabel('electrode ' + str(electrodes[1]))
+        plt.title(title)
+        plt.savefig(folder_save+ title + fig_type)  
+        plt.show()  
+
 def trigger_on_spike(folder, file, new_folder_save, new_file_save, thresh = -30, el=0,
                      time_range=[-10,30], use_time = [], up = True, center_on_peak = False):
     """ reads gap free data from .npz file and triggers on event on given electrode 
