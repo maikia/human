@@ -15,6 +15,7 @@ def plot_data_one_mean(data_details, folder_save, file_save, x_scale = 'sec', ti
     [data, y_scale, fs] = data_details #dh.read_npzdata(folder, file, "data", "scale", "fs")
    
     #import pdb; pdb.set_trace() 
+    #data = data[:,:,::3000]
     if sweeps == []:
         data = data[:,:,:]
     else:

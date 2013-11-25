@@ -60,8 +60,10 @@ def plot_all_figures():
     figure_exp_18(folder_save, file1, file2, fig_type = fig_type)
 
 #exp.save_all_as_npz(fig_no = [25])
-exp.figure_exp_11(fig_type = '.eps',show_traces = True) #,save_traces=False)
-
+#exp.figure_exp_11(fig_type = '.png',show_traces = False) #,save_traces=False)
+#exp.save_all_as_npz(fig_no = [25])
+exp.figure_exp_25(fig_type = '.eps',save_traces = True) #,
+#exp.figure_exp_18(fig_type = '.eps',show_traces = True) #,
 #exp.save_all_as_npz()
 
  
