@@ -44,7 +44,7 @@ def plot_data_one_mean(data_details, folder_save, file_save, x_scale = 'sec', ti
             data[:,trace,:]=data[:,trace,:]-np.transpose(np.resize(calc_avg,(len(data[0,0,:]),len(calc_avg))))
             plot_one_data(data[:,trace,:], title, fs, x_scale, y_scale, plot_color,
                           y_range=y_range, y_title=y_title)
-    avg = np.mean(data,1)
+    avg = np.mean(data[:,:,:],1)
     
     plot_one_data(avg, title, fs, x_scale, y_scale, 'k', lw=3,
                           y_range_intra = y_range_intra, y_range=y_range, y_title=y_title)    
@@ -104,7 +104,7 @@ def plot_data(folder_save,file_save,folder, file, x_scale = 'sec',
     
     # read the data
     [data, y_scale, fs] = dh.read_npzdata(folder, file, "data", "scale", "fs")
-    
+
     if electrodes!=[]:
         data=data[electrodes,:,:]   
         
