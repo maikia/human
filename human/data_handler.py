@@ -105,14 +105,15 @@ def read_npzdata(folder, file, *arg):
 ###########################################################################
 
 ###########################saving data#####################################
-def save_data(folder, file, data, scale, fs):
+def save_data(folder, file, data, scale, fs,record_type, traced, human, comments):
     """ it takes the given parameters of the data and saves it
     to the given file in the given folder. If the folder does not exist it
     will be created first"""
     fold.create_folder(folder)
     full_path = os.path.join(folder, file)
     
-    np.savez(full_path, data = data, scale = scale, fs = fs)   
+    np.savez(full_path, data = data, scale = scale, fs = fs,
+             record_type=record_type, traced=traced, human=human, comments=comments)   
 
 
 ################# defining parameters in the data #####################
@@ -137,13 +138,13 @@ def pts2ms(pts, fs):
     return ms
 
 
-def save_data_as_npz(folder_data, file_data, folder_save, file_save):
+def save_data_as_npz(folder_data, file_data, folder_save, file_save,record_type, traced, human, comments):
     """ takes given data file from the data folder (.abf) and saves 
     it as .npz file under file_save in the folder_save"""
     
     fold.create_folder(folder_save)
     data, scale, fs = read_data(folder_data, file_data)   
-    save_data(folder_save, file_save, data, scale, fs)
+    save_data(folder_save, file_save, data, scale, fs,record_type, traced, human, comments)
     del data, scale, fs
 
 def calculate_spike_width(data, up = False):
@@ -361,7 +362,7 @@ def filter_data(folder_data, file_data, new_folder, new_file, freq,
     N - filter order
     filter type = 'low_pass' or 'high_pass' or 'band_pass' """
     # extract the data
-    [data, y_scale, fs] = read_npzdata(folder_data, file_data, "data", "scale", "fs")     
+    [data, y_scale, fs,record_type, traced, human, comments] = read_npzdata(folder_data, file_data, "data", "scale", "fs", "record_type", "traced", "human", "comments")     
     if electrodes == []:
         electrodes = range(len(data))
     #import pdb; pdb.set_trace()
@@ -383,12 +384,7 @@ def filter_data(folder_data, file_data, new_folder, new_file, freq,
     
     
     fold.create_folder(new_folder)  
-    save_data(new_folder, new_file, data, y_scale, fs)       
-    
-    
-   
-    
-# - unfinished - untested
+    save_data(new_folder, new_file, data, y_scale, fs,record_type, traced, human, comments)       
     
 
 

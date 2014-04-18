@@ -94,16 +94,17 @@ def plot_one_data(data_trace, tit, fs, x_scale, y_scale, plot_color, lw=2,
     plt.xlabel('Time ('+x_scale + ')')
     
 
-def plot_data(folder_save,file_save,folder, file, x_scale = 'sec',
+def plot_data(folder_save,file_save,folder_read, file_read, x_scale = 'sec',
               title = 'Data', time_range = [], y_range =[-30, 70],
-              electrodes = [],y_range_intra = []):
+              electrodes = [],y_range_intra = [],show_plot=False,save_plot=True):
     """ reads and then plots given data
     x_scale - time scale in which to display the data, possible options:
     'ms', 'sec', 'min'; time_range is given in 'ms' """
     # import pdb; pdb.set_trace() 
     
     # read the data
-    [data, y_scale, fs] = dh.read_npzdata(folder, file, "data", "scale", "fs")
+
+    [data, y_scale, fs] = dh.read_npzdata(folder_read, file_read, "data", "scale", "fs")
 
     if electrodes!=[]:
         data=data[electrodes,:,:]   
@@ -113,18 +114,23 @@ def plot_data(folder_save,file_save,folder, file, x_scale = 'sec',
         time_pts2 = dh.ms2pts(time_range[1], fs)
         data = data[:,:,time_pts1:time_pts2]
         
-        
+    fig = plt.figure()
     plot_color = 'k'
     for trace in range(np.size(data, 1)):
-        fig = plt.figure()
         if np.size(data,1) > 1:
             tit = title + ', trace ' + str(trace)
         else:
             tit = title
         plot_one_data(data[:,trace,:], tit, fs, x_scale, y_scale, plot_color, y_range=y_range, 
                       y_range_intra = y_range_intra)
+        if show_plot:
+            plt.show()
+            
+    if save_plot:
         plt.savefig(folder_save+str(trace) +file_save)
-        plt.show()
+    return fig
+    
+
     
 
     

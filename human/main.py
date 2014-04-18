@@ -59,12 +59,14 @@ def plot_all_figures():
     file2 = '2013_10_08_0008_NBQX.npz'    
     figure_exp_18(folder_save, file1, file2, fig_type = fig_type)
 
-exp.save_all_as_npz(fig_no = [28])
-#exp.figure_exp_11(fig_type = '.png',show_traces = False) #,save_traces=False)
+#exp.save_all_as_npz(fig_no = [35,36])
+exp.figure_exp_36(fig_type = '.png',show_traces = True) #,save_traces=False)
+
 #exp.save_all_as_npz(fig_no = [26,27])
 #exp.figure_exp_15(fig_type = '.png',show_traces = True) #,
-exp.figure_exp_28(fig_type = '.png',show_traces = True) #,
+#exp.figure_exp_28(fig_type = '.png',show_traces = True) #,
 #exp.figure_exp_18(fig_type = '.eps',show_traces = True) #,
 #exp.save_all_as_npz()
+#exp.analyze_data(0, fig_type='.png',save_traces=True,show_traces=True)
 
  
